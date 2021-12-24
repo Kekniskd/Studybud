@@ -99,29 +99,22 @@ def room(request, pk):
     room = Room.objects.get(id=pk)
     room_messages = room.message_set.all().order_by('-created')
     participants = room.participants.all()
-    joiningRequests = []
 
 
     if request.method == 'POST':
 
-        if 'message-form' in request.POST:
-            message = Message.objects.create(
-                user = request.user,
-                room = room,
-                body = request.POST.get('body')
-            )
-            return redirect('room', pk=room.id)
-
-        elif 'addRequest' in request.POST:
-            joiningRequests.append(request.user)
-            messages.error(request, 'Your request is submited')
+        message = Message.objects.create(
+            user = request.user,
+            room = room,
+            body = request.POST.get('body')
+        )
+        return redirect('room', pk=room.id)
 
         
 
 
 
-    context = {'room': room, 'room_messages': room_messages, 'participants': participants,
-                'joiningRequests': joiningRequests}
+    context = {'room': room, 'room_messages': room_messages, 'participants': participants}
     return render(request, 'base/room.html', context)
 
 
@@ -150,10 +143,8 @@ def createRoom(request):
                 host=request.user,
                 topic=topic,
                 name=request.POST.get('name'),
-                # participants=
                 description=request.POST.get('description'),
             )
-
             return redirect('home')
         except IntegrityError:
             messages.error(request, 'Room name should be unique!!!')

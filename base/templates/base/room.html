@@ -138,7 +138,7 @@
           </div>
           <div class="room__message">
 
-            {% if request.user in participants %}
+            {% if request.user in participants or request.user == room.host%}
             <form action="" method="POST" name="message-form">
               {% csrf_token %}
               <input name="body" placeholder="Write your message here..." />
