@@ -144,6 +144,24 @@ def acceptUser(request, pk, kp):
 
 
 
+
+
+@login_required(login_url='login')
+def rejectUser(request, pk, kp):
+    user = User.objects.get(id=pk)
+    room = Room.objects.get(id=kp)
+
+    if request.method == 'POST':
+        room.requesters.remove(user)
+        return redirect('home')
+
+    context = {'user': user.username, 'room': room.name}
+    return render(request, 'base/accept_user.html', context)
+
+
+
+
+
 @login_required(login_url='login')
 def joinRequest(request, pk):
     room = Room.objects.get(id=pk)
