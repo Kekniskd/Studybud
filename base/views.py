@@ -1,3 +1,4 @@
+from re import U
 from typing import Pattern
 from django.shortcuts import render, redirect
 from django.db.models import Q
@@ -7,7 +8,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from .models import Message, Room, Topic
+from .models import Message,  Room, Topic
 from .froms import RoomForm, UserForm
 from django.db import IntegrityError
 # Create your views here.
@@ -99,10 +100,11 @@ def room(request, pk):
     room = Room.objects.get(id=pk)
     room_messages = room.message_set.all().order_by('-created')
     participants = room.participants.all()
+    requesters = room.requesters.all()
+
 
 
     if request.method == 'POST':
-
         message = Message.objects.create(
             user = request.user,
             room = room,
@@ -110,11 +112,8 @@ def room(request, pk):
         )
         return redirect('room', pk=room.id)
 
-        
-
-
-
-    context = {'room': room, 'room_messages': room_messages, 'participants': participants}
+    context = {'room': room, 'room_messages': room_messages, 'participants': participants,
+                'requesters': requesters}
     return render(request, 'base/room.html', context)
 
 
@@ -127,6 +126,33 @@ def userProfile(request, pk):
     context = {'user': user, 'rooms': rooms,
                 'room_messages': room_messages, 'topics': topics}
     return render(request, 'base/profile.html', context)
+
+
+
+@login_required(login_url='login')
+def acceptUser(request, pk, kp):
+    user = User.objects.get(id=pk)
+    room = Room.objects.get(id=kp)
+
+    if request.method == 'POST':
+        room.participants.add(user)
+        room.requesters.remove(user)
+        return redirect('home')
+
+    context = {'user': user.username, 'room': room.name}
+    return render(request, 'base/accept_user.html', context)
+
+
+
+@login_required(login_url='login')
+def joinRequest(request, pk):
+    room = Room.objects.get(id=pk)
+    if request.method == 'POST':
+        room.requesters.add(request.user)
+        return redirect('home')
+
+
+    return render(request, 'base/join_request.html')
 
 
 

@@ -88,11 +88,10 @@
               </div> -->
               <span class="room__topics">{{room.topic}}</span>
 
-              {% if request.user not in participants %}
-              <form action="" method="POST" name="addRequest">
-                {% csrf_token %}
-              <span class="room__topics"><input type="submit"></span>
-              </form>
+              {% if request.user not in participants and request.user != room.host %}
+              <a href="{% url 'join-request' room.id %}">
+                <span class="room__topics">Join</span>
+              </a>
               {% endif %}
 
 
@@ -141,6 +140,7 @@
             {% if request.user in participants or request.user == room.host%}
             <form action="" method="POST" name="message-form">
               {% csrf_token %}
+              <input type="hidden" name="message-form" value="message">
               <input name="body" placeholder="Write your message here..." />
             </form>
             {% endif %}
@@ -164,19 +164,26 @@
 
             {% if request.user == room.host %}
 
-            {% for user in joiningRequests %}
-            <a href="{% url 'user-profile' user.id%}" class="participant">
+
+            {% for requester in requesters %}
+            <a href="{% url 'user-profile' request.user.id%}" class="participant">
               <div class="avatar avatar--medium">
                 <img src="https://randomuser.me/api/portraits/men/37.jpg" />
               </div>
               <p>
-                {{user.username}}
-                <span>@{{user.username}}</span>
+                {{requester.username}}
+                <span>@{{requester.username}}</span>
+                <a href="{% url 'accept-user' requester.id room.id %}">Accept</a>
+                <a href="">Reject</a>
+                
                 
               </p>
             </a>
             {% endfor %}
               
+
+
+
             {% endif %}
 
             {% for user in participants %}
