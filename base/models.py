@@ -25,8 +25,6 @@ class Room(models.Model):
     class Meta:
         ordering = ['-updated', '-created']
 
-
-
     def __str__(self):
         return self.name
 
@@ -45,4 +43,3 @@ class Message(models.Model):
 
     def __str__(self):
         return self.body[0:50]
-
